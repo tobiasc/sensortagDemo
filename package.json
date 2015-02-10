@@ -1,0 +1,17 @@
+{
+  "name": "sensortag-play",
+  "private": true,
+  "version": "0.0.0",
+  "description": "testing sensortag",
+  "dependencies": {
+    "sensortag": "^0.1.9"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "debug": "node debug app.js"
+  },
+  "main": "app.js",
+  "repository": "",
+  "author": "",
+  "license": ""
+}
