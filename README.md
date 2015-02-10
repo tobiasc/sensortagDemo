@@ -29,3 +29,7 @@ notifyGyroscope
 (-0.063, -1.141, -0.063) - (1.175, 6.18, 3.044) - 26.6 °C - 88.4 %
 (0.109, -0.859, 0.016) - (1.175, 6.18, 3.044) - 26.6 °C - 88.4 %
 ```
+
+### Resources
+- https://github.com/sandeepmistry/node-sensortag
+- https://gist.github.com/sandeepmistry/6075857
