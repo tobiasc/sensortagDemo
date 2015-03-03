@@ -8,13 +8,30 @@ var SensorTag = require('sensortag'),
 		zG: 0, // Z gyroscope
 		humidity: 0, 
 		temperature: 0
-	};
+	},
+	config = {
+		print: false,
+		temperature: {
+			curr: 25,
+			min: 20,
+			max: 30
+		},
+		humidity: {
+			curr: 35,
+			min: 30,
+			max: 50
+		},
+		leftButtonClickMode: 'temperature',
+		leftButtonClickTime: new Date().getTime()
+	}
 
 function printVariables() {
-	console.log('(%d, %d, %d) - (%d, %d, %d) - %d °C - %d %', 
-		sensorData.xA.toFixed(3), sensorData.yA.toFixed(3), sensorData.zA.toFixed(3), 
-		sensorData.xG.toFixed(3), sensorData.yG.toFixed(3), sensorData.zG.toFixed(3), 
-		sensorData.temperature.toFixed(1), sensorData.humidity.toFixed(1));
+	if (config.print && sensorData.temperature > config.temperature.curr && sensorData.humidity > config.humidity.curr) {
+		console.log('(%d, %d, %d) - (%d, %d, %d) - %d °C - %d %', 
+			sensorData.xA.toFixed(3), sensorData.yA.toFixed(3), sensorData.zA.toFixed(3), 
+			sensorData.xG.toFixed(3), sensorData.yG.toFixed(3), sensorData.zG.toFixed(3), 
+			sensorData.temperature.toFixed(1), sensorData.humidity.toFixed(1));
+	}
 }
 
 SensorTag.discover(function(sensorTag) {
@@ -26,9 +43,38 @@ SensorTag.discover(function(sensorTag) {
 
 			setInterval(function () {
 				printVariables();
-			}, 200);
+			}, 500);
 
-			// enable collection of humidity & temparature
+			// enable collection of key presses
+			sensorTag.notifySimpleKey(function() {
+				sensorTag.on('simpleKeyChange', function(left, right) {
+					// left button is only used to turn printing on/off
+					if (left) {
+						config.print = (config.print) ? false : true;
+						if (config.print) {
+							console.log('Printing Enabled');
+						} else {
+							console.log('Printing Disabled');
+						}
+					}
+
+					// right button can be used to toggle between humidity or temperature threshold change
+					if (right) {
+						// if click is within 250 milliseconds, switch click mode
+						var clickTime = new Date().getTime();
+						if ((config.leftButtonClickTime + 250) > clickTime) {
+							config.leftButtonClickMode = (config.leftButtonClickMode === 'temperature') ? 'humidity' : 'temperature';
+							console.log('leftButtonClickMode set to ' + config.leftButtonClickMode);
+						} else {
+							config[config.leftButtonClickMode].curr = (config[config.leftButtonClickMode].curr + 1 <= config[config.leftButtonClickMode].max) ? config[config.leftButtonClickMode].curr + 1 : config[config.leftButtonClickMode].min;
+							console.log(config.leftButtonClickMode + ' Threshold = ' + config[config.leftButtonClickMode].curr);
+						}
+						config.leftButtonClickTime = clickTime;
+					}
+				});
+			});				
+
+			// enable collection of humidity & temperature
 			sensorTag.enableHumidity(function() {
 				sensorTag.on('humidityChange', function(temperature, humidity) {
 					sensorData.temperature = temperature;
